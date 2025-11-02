@@ -10,27 +10,50 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
-            --primary: #6a11cb;
-            --secondary: #2575fc;
-            --dark: #1a1a2e;
-            --darker: #16213e;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --light: #ecf0f1;
-            --text: #333;
+            --primary: #8b5cf6;
+            --secondary: #06b6d4;
+            --dark: #0f172a;
+            --darker: #020617;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f8fafc;
+            --text: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --bg-color: #0f172a;
+            --header-bg: rgba(15, 23, 42, 0.95);
+            --footer-bg: rgba(15, 23, 42, 0.95);
+        }
+
+        [data-theme="light"] {
+            --primary: #7c3aed;
+            --secondary: #0891b2;
+            --dark: #f1f5f9;
+            --darker: #e2e8f0;
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --light: #1e293b;
+            --text: #334155;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.1);
+            --bg-color: #f8fafc;
+            --header-bg: rgba(248, 250, 252, 0.95);
+            --footer-bg: rgba(248, 250, 252, 0.95);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
         
         body {
-            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
-            color: white;
+            background: var(--bg-color);
+            color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
         }
@@ -44,14 +67,15 @@
         
         /* Header Styles */
         header {
-            background-color: rgba(26, 26, 46, 0.9);
-            color: white;
+            background-color: var(--header-bg);
+            color: var(--text);
             padding: 1rem 0;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
             z-index: 100;
+            border-bottom: 1px solid var(--card-border);
         }
         
         .header-content {
@@ -75,6 +99,15 @@
             font-size: 2rem;
         }
         
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text);
+            margin-right: 15px;
+        }
+        
         nav ul {
             display: flex;
             list-style: none;
@@ -85,27 +118,39 @@
         }
         
         nav ul li a {
-            color: white;
+            color: var(--text);
             text-decoration: none;
-            transition: color 0.3s;
+            transition: all 0.3s;
             font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
         }
         
-        nav ul li a:hover {
-            color: var(--primary);
-            background: rgba(255,255,255,0.1);
+        nav ul li a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
+        }
+        
+        nav ul li a:hover::before {
+            width: 100%;
         }
         
         .user-info {
             display: flex;
             align-items: center;
+            gap: 10px;
         }
         
         .user-info span {
-            margin-right: 10px;
-            color: #ddd;
+            color: var(--text);
         }
         
         .btn {
@@ -114,17 +159,34 @@
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.3s;
             font-weight: 600;
-            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.6);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
         }
         
         .btn-outline {
@@ -139,11 +201,11 @@
         }
         
         .btn-danger {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            background: linear-gradient(45deg, #ef4444, #dc2626);
         }
         
         .btn-success {
-            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            background: linear-gradient(45deg, #10b981, #059669);
         }
         
         /* Main Content */
@@ -154,16 +216,29 @@
         
         .page-title {
             margin-bottom: 1.5rem;
-            color: white;
+            color: var(--text);
             padding-bottom: 0.5rem;
             font-size: 2.2rem;
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 3px;
         }
         
         .page-subtitle {
-            color: #bbb;
+            color: var(--text);
+            opacity: 0.7;
             margin-bottom: 2rem;
             font-size: 1.1rem;
         }
@@ -172,25 +247,37 @@
         .auth-container {
             max-width: 450px;
             margin: 2rem auto;
-            background: rgba(26, 26, 46, 0.8);
+            background: var(--card-bg);
             padding: 2.5rem;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
         }
         
         .auth-container h2 {
             text-align: center;
             margin-bottom: 1.5rem;
-            color: white;
+            color: var(--text);
             font-size: 1.8rem;
         }
         
         .auth-tabs {
             display: flex;
             margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--card-border);
         }
         
         .auth-tab {
@@ -200,6 +287,7 @@
             cursor: pointer;
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
+            font-weight: 500;
         }
         
         .auth-tab.active {
@@ -215,25 +303,35 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
-            color: #ddd;
+            color: var(--text);
         }
         
         .form-control {
             width: 100%;
             padding: 12px 15px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 8px;
             font-size: 1rem;
-            color: white;
+            color: var(--text);
             transition: all 0.3s;
         }
         
         .form-control:focus {
             border-color: var(--primary);
             outline: none;
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.3);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+        }
+        
+        .form-control.error {
+            border-color: var(--danger);
+        }
+        
+        .error-message {
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
         }
         
         /* Dashboard */
@@ -245,22 +343,34 @@
         }
         
         .card {
-            background: rgba(26, 26, 46, 0.7);
+            background: var(--card-bg);
             border-radius: 15px;
             padding: 1.8rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--card-border);
             transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
         }
         
         .card h3 {
-            color: #ddd;
+            color: var(--text);
             margin-bottom: 0.8rem;
             font-size: 1.1rem;
         }
@@ -276,12 +386,12 @@
         
         /* Inventory Table */
         .table-container {
-            background: rgba(26, 26, 46, 0.7);
+            background: var(--card-bg);
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--card-border);
             margin-bottom: 2rem;
         }
         
@@ -293,18 +403,18 @@
         th, td {
             padding: 15px 20px;
             text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: #ddd;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text);
         }
         
         th {
-            background-color: rgba(37, 117, 252, 0.2);
+            background-color: rgba(6, 182, 212, 0.2);
             font-weight: 600;
-            color: white;
+            color: var(--text);
         }
         
         tr:hover {
-            background-color: rgba(255,255,255,0.05);
+            background-color: rgba(255, 255, 255, 0.05);
         }
         
         .status-available {
@@ -330,23 +440,35 @@
         }
         
         .service-card {
-            background: rgba(26, 26, 46, 0.7);
+            background: var(--card-bg);
             border-radius: 15px;
             padding: 1.8rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--card-border);
             border-left: 5px solid var(--primary);
             transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
         }
         
         .service-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
         }
         
         .service-card h3 {
-            color: white;
+            color: var(--text);
             margin-bottom: 0.8rem;
             font-size: 1.3rem;
         }
@@ -362,11 +484,11 @@
         
         /* Footer */
         footer {
-            background-color: rgba(26, 26, 46, 0.9);
-            color: #bbb;
+            background-color: var(--footer-bg);
+            color: var(--text);
             text-align: center;
             padding: 1.5rem 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid var(--card-border);
         }
         
         /* Modal */
@@ -377,7 +499,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.7);
+            background-color: rgba(0, 0, 0, 0.7);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -385,13 +507,24 @@
         }
         
         .modal-content {
-            background: rgba(26, 26, 46, 0.95);
+            background: var(--card-bg);
             padding: 2.5rem;
             border-radius: 15px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            position: relative;
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
         }
         
         .modal-header {
@@ -402,7 +535,7 @@
         }
         
         .modal-header h2 {
-            color: white;
+            color: var(--text);
             font-size: 1.5rem;
         }
         
@@ -411,12 +544,12 @@
             border: none;
             font-size: 1.8rem;
             cursor: pointer;
-            color: #bbb;
+            color: var(--text);
             transition: color 0.3s;
         }
         
         .close-modal:hover {
-            color: white;
+            color: var(--primary);
         }
         
         /* Loading Spinner */
@@ -443,15 +576,15 @@
         }
         
         .alert-success {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-            border: 1px solid rgba(46, 204, 113, 0.3);
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
         .alert-error {
-            background-color: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-            border: 1px solid rgba(231, 76, 60, 0.3);
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
         /* Responsive */
@@ -492,7 +625,7 @@
             <div class="logo">
                 <i>🔧</i> Shadow Phone Repair
             </div>
-            <nav>
+            <nav id="main-nav" style="display: none;">
                 <ul>
                     <li><a href="#" id="nav-dashboard">Dashboard</a></li>
                     <li><a href="#" id="nav-inventory">Inventory</a></li>
@@ -501,8 +634,9 @@
                 </ul>
             </nav>
             <div class="user-info">
-                <span id="user-name">Welcome, User</span>
-                <button id="logout-btn" class="btn btn-danger">Logout</button>
+                <button class="theme-toggle" id="theme-toggle">🌙</button>
+                <span id="user-name">Welcome, Guest</span>
+                <button id="logout-btn" class="btn btn-danger" style="display: none;">Logout</button>
             </div>
         </div>
     </header>
@@ -511,7 +645,7 @@
     <main>
         <div class="container">
             <!-- Dashboard Page -->
-            <div id="dashboard-page" class="page">
+            <div id="dashboard-page" class="page" style="display: none;">
                 <h1 class="page-title">Supplier Dashboard</h1>
                 <p class="page-subtitle">Manage your parts inventory and track your account</p>
                 
@@ -615,6 +749,13 @@
                     <div class="form-group">
                         <label for="account-name">Full Name</label>
                         <input type="text" id="account-name" class="form-control">
+                        <div class="error-message" id="account-name-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="account-username">Username</label>
+                        <input type="text" id="account-username" class="form-control">
+                        <div class="error-message" id="account-username-error"></div>
                     </div>
                     
                     <div class="form-group">
@@ -625,16 +766,18 @@
                     <div class="form-group">
                         <label for="account-phone">Phone Number</label>
                         <input type="tel" id="account-phone" class="form-control">
+                        <div class="error-message" id="account-phone-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="account-business">Business Name</label>
                         <input type="text" id="account-business" class="form-control">
+                        <div class="error-message" id="account-business-error"></div>
                     </div>
                     
                     <button class="btn" id="update-profile-btn">Update Profile</button>
                     
-                    <hr style="margin: 1.5rem 0; border-color: rgba(255,255,255,0.1);">
+                    <hr style="margin: 1.5rem 0; border-color: var(--card-border);">
                     
                     <h2>Change Password</h2>
                     
@@ -643,16 +786,19 @@
                     <div class="form-group">
                         <label for="current-password">Current Password</label>
                         <input type="password" id="current-password" class="form-control">
+                        <div class="error-message" id="current-password-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="new-password">New Password</label>
                         <input type="password" id="new-password" class="form-control">
+                        <div class="error-message" id="new-password-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="confirm-password">Confirm New Password</label>
                         <input type="password" id="confirm-password" class="form-control">
+                        <div class="error-message" id="confirm-password-error"></div>
                     </div>
                     
                     <button class="btn" id="change-password-btn">Change Password</button>
@@ -679,11 +825,13 @@
                         <div class="form-group">
                             <label for="login-email">Email Address</label>
                             <input type="email" id="login-email" class="form-control" placeholder="Enter your email">
+                            <div class="error-message" id="login-email-error"></div>
                         </div>
                         
                         <div class="form-group">
                             <label for="login-password">Password</label>
                             <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+                            <div class="error-message" id="login-password-error"></div>
                         </div>
                         
                         <button class="btn" id="login-btn" style="width: 100%;">Login</button>
@@ -701,31 +849,43 @@
                         <div class="form-group">
                             <label for="register-name">Full Name</label>
                             <input type="text" id="register-name" class="form-control" placeholder="Enter your full name">
+                            <div class="error-message" id="register-name-error"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-username">Username</label>
+                            <input type="text" id="register-username" class="form-control" placeholder="Choose a username">
+                            <div class="error-message" id="register-username-error"></div>
                         </div>
                         
                         <div class="form-group">
                             <label for="register-email">Email Address</label>
                             <input type="email" id="register-email" class="form-control" placeholder="Enter your email">
+                            <div class="error-message" id="register-email-error"></div>
                         </div>
                         
                         <div class="form-group">
                             <label for="register-phone">Phone Number</label>
                             <input type="tel" id="register-phone" class="form-control" placeholder="Enter your phone number">
+                            <div class="error-message" id="register-phone-error"></div>
                         </div>
                         
                         <div class="form-group">
                             <label for="register-business">Business Name</label>
                             <input type="text" id="register-business" class="form-control" placeholder="Enter your business name">
+                            <div class="error-message" id="register-business-error"></div>
                         </div>
                         
                         <div class="form-group">
                             <label for="register-password">Password</label>
                             <input type="password" id="register-password" class="form-control" placeholder="Create a password">
+                            <div class="error-message" id="register-password-error"></div>
                         </div>
                         
                         <div class="form-group">
                             <label for="register-confirm">Confirm Password</label>
                             <input type="password" id="register-confirm" class="form-control" placeholder="Confirm your password">
+                            <div class="error-message" id="register-confirm-error"></div>
                         </div>
                         
                         <button class="btn" id="register-btn" style="width: 100%;">Create Account</button>
@@ -742,7 +902,7 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2023 Shadow Phone Repair. All rights reserved.</p>
+            <p>&copy; <span id="current-year">2025</span> Shadow Phone Repair. All rights reserved.</p>
             <p>Professional Phone Repair Supplier Network</p>
         </div>
     </footer>
@@ -760,6 +920,7 @@
             <div class="form-group">
                 <label for="reset-email">Enter your email address</label>
                 <input type="email" id="reset-email" class="form-control" placeholder="Your registered email">
+                <div class="error-message" id="reset-email-error"></div>
             </div>
             
             <button class="btn" id="send-reset-code">Send Reset Code</button>
@@ -768,11 +929,13 @@
                 <div class="form-group">
                     <label for="reset-code">Enter the code sent to your email</label>
                     <input type="text" id="reset-code" class="form-control" placeholder="6-digit code">
+                    <div class="error-message" id="reset-code-error"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="new-password-reset">New Password</label>
                     <input type="password" id="new-password-reset" class="form-control">
+                    <div class="error-message" id="new-password-reset-error"></div>
                 </div>
                 
                 <button class="btn" id="reset-password-btn">Reset Password</button>
@@ -782,17 +945,14 @@
 
     <script>
         const firebaseConfig = {
-  apiKey: "AIzaSyB8L_DKoHtgPIFll0XgaSO_EYSth8C7vNw",
-  authDomain: "shadow-phone-repair.firebaseapp.com",
-  databaseURL: "https://shadow-phone-repair-default-rtdb.firebaseio.com",
-  projectId: "shadow-phone-repair",
-  storageBucket: "shadow-phone-repair.firebasestorage.app",
-  messagingSenderId: "784438310959",
-  appId: "1:784438310959:web:0f13ffeebad343882f6eda"
-};
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+            apiKey: "AIzaSyB8L_DKoHtgPIFll0XgaSO_EYSth8C7vNw",
+            authDomain: "shadow-phone-repair.firebaseapp.com",
+            databaseURL: "https://shadow-phone-repair-default-rtdb.firebaseio.com",
+            projectId: "shadow-phone-repair",
+            storageBucket: "shadow-phone-repair.firebasestorage.app",
+            messagingSenderId: "784438310959",
+            appId: "1:784438310959:web:0f13ffeebad343882f6eda"
+        };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -806,11 +966,40 @@
         const flashingPage = document.getElementById('flashing-page');
         const accountPage = document.getElementById('account-page');
         const forgotPasswordModal = document.getElementById('forgot-password-modal');
+        const mainNav = document.getElementById('main-nav');
+        const logoutBtn = document.getElementById('logout-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const currentYear = document.getElementById('current-year');
         
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const loginTab = document.getElementById('login-tab');
         const registerTab = document.getElementById('register-tab');
+        
+        // Set current year
+        currentYear.textContent = new Date().getFullYear();
+        
+        // Theme toggle
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        // Check for saved theme or prefer-color-scheme
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 
+                              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            setTheme(savedTheme);
+        }
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
         
         // Navigation buttons
         document.getElementById('nav-dashboard').addEventListener('click', () => showPage('dashboard'));
@@ -859,6 +1048,9 @@
         document.getElementById('update-profile-btn').addEventListener('click', updateProfile);
         document.getElementById('change-password-btn').addEventListener('click', changePassword);
         
+        // Input validation
+        setupInputValidation();
+        
         // Firebase Auth State Listener
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -866,14 +1058,19 @@
                 showPage('dashboard');
                 updateUserInfo(user);
                 loadUserData(user.uid);
+                mainNav.style.display = 'block';
+                logoutBtn.style.display = 'block';
             } else {
                 // User is signed out
                 showPage('login');
+                mainNav.style.display = 'none';
+                logoutBtn.style.display = 'none';
             }
         });
         
         // Initialize the app when the page loads
         function initApp() {
+            initTheme();
             // Firebase auth state listener will handle page display
         }
         
@@ -910,30 +1107,240 @@
             }
         }
         
+        // Setup input validation
+        function setupInputValidation() {
+            // Email validation
+            const emailInputs = document.querySelectorAll('input[type="email"]');
+            emailInputs.forEach(input => {
+                input.addEventListener('blur', validateEmail);
+            });
+            
+            // Username validation
+            const usernameInputs = document.querySelectorAll('input[id*="username"]');
+            usernameInputs.forEach(input => {
+                input.addEventListener('blur', validateUsername);
+            });
+            
+            // Phone validation
+            const phoneInputs = document.querySelectorAll('input[type="tel"]');
+            phoneInputs.forEach(input => {
+                input.addEventListener('blur', validatePhone);
+            });
+            
+            // Password validation
+            const passwordInputs = document.querySelectorAll('input[type="password"]');
+            passwordInputs.forEach(input => {
+                input.addEventListener('blur', validatePassword);
+            });
+            
+            // Name validation
+            const nameInputs = document.querySelectorAll('input[id*="name"]');
+            nameInputs.forEach(input => {
+                if (!input.id.includes('username')) {
+                    input.addEventListener('blur', validateName);
+                }
+            });
+            
+            // Business name validation
+            const businessInputs = document.querySelectorAll('input[id*="business"]');
+            businessInputs.forEach(input => {
+                input.addEventListener('blur', validateBusiness);
+            });
+        }
+        
+        // Validation functions
+        function validateEmail(e) {
+            const email = e.target.value;
+            const errorElement = document.getElementById(e.target.id + '-error');
+            
+            if (!email) {
+                showError(e.target, errorElement, 'Email is required');
+                return false;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError(e.target, errorElement, 'Please enter a valid email address');
+                return false;
+            }
+            
+            clearError(e.target, errorElement);
+            return true;
+        }
+        
+        function validateUsername(e) {
+            const username = e.target.value;
+            const errorElement = document.getElementById(e.target.id + '-error');
+            
+            if (!username) {
+                showError(e.target, errorElement, 'Username is required');
+                return false;
+            }
+            
+            if (username.length < 3) {
+                showError(e.target, errorElement, 'Username must be at least 3 characters');
+                return false;
+            }
+            
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                showError(e.target, errorElement, 'Username can only contain letters, numbers, and underscores');
+                return false;
+            }
+            
+            clearError(e.target, errorElement);
+            return true;
+        }
+        
+        function validatePhone(e) {
+            const phone = e.target.value;
+            const errorElement = document.getElementById(e.target.id + '-error');
+            
+            if (!phone) {
+                showError(e.target, errorElement, 'Phone number is required');
+                return false;
+            }
+            
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+                showError(e.target, errorElement, 'Please enter a valid phone number');
+                return false;
+            }
+            
+            clearError(e.target, errorElement);
+            return true;
+        }
+        
+        function validatePassword(e) {
+            const password = e.target.value;
+            const errorElement = document.getElementById(e.target.id + '-error');
+            
+            if (!password) {
+                showError(e.target, errorElement, 'Password is required');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showError(e.target, errorElement, 'Password must be at least 6 characters');
+                return false;
+            }
+            
+            clearError(e.target, errorElement);
+            return true;
+        }
+        
+        function validateName(e) {
+            const name = e.target.value;
+            const errorElement = document.getElementById(e.target.id + '-error');
+            
+            if (!name) {
+                showError(e.target, errorElement, 'Name is required');
+                return false;
+            }
+            
+            if (name.length < 2) {
+                showError(e.target, errorElement, 'Name must be at least 2 characters');
+                return false;
+            }
+            
+            clearError(e.target, errorElement);
+            return true;
+        }
+        
+        function validateBusiness(e) {
+            const business = e.target.value;
+            const errorElement = document.getElementById(e.target.id + '-error');
+            
+            if (!business) {
+                showError(e.target, errorElement, 'Business name is required');
+                return false;
+            }
+            
+            clearError(e.target, errorElement);
+            return true;
+        }
+        
+        function showError(input, errorElement, message) {
+            input.classList.add('error');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function clearError(input, errorElement) {
+            input.classList.remove('error');
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+        }
+        
+        // Get professional error message
+        function getProfessionalErrorMessage(error) {
+            const errorCode = error.code;
+            
+            switch(errorCode) {
+                case 'auth/user-not-found':
+                    return 'No account found with this email address';
+                case 'auth/wrong-password':
+                    return 'Incorrect password. Please try again';
+                case 'auth/invalid-email':
+                    return 'Please enter a valid email address';
+                case 'auth/email-already-in-use':
+                    return 'This email is already registered with another account';
+                case 'auth/weak-password':
+                    return 'Password is too weak. Please use at least 6 characters';
+                case 'auth/username-already-exists':
+                    return 'This username is already taken. Please choose another';
+                case 'auth/operation-not-allowed':
+                    return 'This operation is not allowed. Please contact support';
+                case 'auth/too-many-requests':
+                    return 'Too many unsuccessful attempts. Please try again later';
+                case 'auth/network-request-failed':
+                    return 'Network error. Please check your connection and try again';
+                default:
+                    return 'An unexpected error occurred. Please try again';
+            }
+        }
+        
+        // Check if username already exists
+        async function checkUsernameExists(username) {
+            try {
+                const querySnapshot = await db.collection('users')
+                    .where('username', '==', username)
+                    .get();
+                
+                return !querySnapshot.empty;
+            } catch (error) {
+                console.error('Error checking username:', error);
+                return false;
+            }
+        }
+        
         // Login function
-        function login() {
+        async function login() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const loginAlert = document.getElementById('login-alert');
             
-            if (!email || !password) {
-                showAlert(loginAlert, 'Please enter both email and password', 'error');
+            // Validate inputs
+            const emailValid = validateEmail({ target: document.getElementById('login-email') });
+            const passwordValid = validatePassword({ target: document.getElementById('login-password') });
+            
+            if (!emailValid || !passwordValid) {
+                showAlert(loginAlert, 'Please fix the errors above', 'error');
                 return;
             }
             
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Signed in successfully
-                    showAlert(loginAlert, 'Login successful!', 'success');
-                })
-                .catch((error) => {
-                    showAlert(loginAlert, error.message, 'error');
-                });
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showAlert(loginAlert, 'Login successful!', 'success');
+            } catch (error) {
+                const professionalMessage = getProfessionalErrorMessage(error);
+                showAlert(loginAlert, professionalMessage, 'error');
+            }
         }
         
         // Register function
-        function register() {
+        async function register() {
             const name = document.getElementById('register-name').value;
+            const username = document.getElementById('register-username').value;
             const email = document.getElementById('register-email').value;
             const phone = document.getElementById('register-phone').value;
             const business = document.getElementById('register-business').value;
@@ -941,8 +1348,17 @@
             const confirmPassword = document.getElementById('register-confirm').value;
             const registerAlert = document.getElementById('register-alert');
             
-            if (!name || !email || !phone || !business || !password) {
-                showAlert(registerAlert, 'Please fill in all fields', 'error');
+            // Validate all inputs
+            const nameValid = validateName({ target: document.getElementById('register-name') });
+            const usernameValid = validateUsername({ target: document.getElementById('register-username') });
+            const emailValid = validateEmail({ target: document.getElementById('register-email') });
+            const phoneValid = validatePhone({ target: document.getElementById('register-phone') });
+            const businessValid = validateBusiness({ target: document.getElementById('register-business') });
+            const passwordValid = validatePassword({ target: document.getElementById('register-password') });
+            const confirmValid = validatePassword({ target: document.getElementById('register-confirm') });
+            
+            if (!nameValid || !usernameValid || !emailValid || !phoneValid || !businessValid || !passwordValid || !confirmValid) {
+                showAlert(registerAlert, 'Please fix the errors above', 'error');
                 return;
             }
             
@@ -951,44 +1367,46 @@
                 return;
             }
             
-            if (password.length < 6) {
-                showAlert(registerAlert, 'Password should be at least 6 characters', 'error');
+            // Check if username already exists
+            const usernameExists = await checkUsernameExists(username);
+            if (usernameExists) {
+                showAlert(registerAlert, 'Username already taken. Please choose another', 'error');
                 return;
             }
             
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // User created successfully
-                    const user = userCredential.user;
-                    
-                    // Update user profile
-                    return user.updateProfile({
-                        displayName: name
-                    }).then(() => {
-                        // Create user document in Firestore
-                        return db.collection('users').doc(user.uid).set({
-                            name: name,
-                            email: email,
-                            phone: phone,
-                            business: business,
-                            balance: 0,
-                            recentOrders: 0,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            isActive: true
-                        });
-                    });
-                })
-                .then(() => {
-                    showAlert(registerAlert, 'Account created successfully!', 'success');
-                    // Switch to login tab after successful registration
-                    setTimeout(() => {
-                        loginTab.click();
-                        document.getElementById('login-email').value = email;
-                    }, 1500);
-                })
-                .catch((error) => {
-                    showAlert(registerAlert, error.message, 'error');
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // User created successfully
+                const user = userCredential.user;
+                
+                // Update user profile
+                await user.updateProfile({
+                    displayName: name
                 });
+                
+                // Create user document in Firestore
+                await db.collection('users').doc(user.uid).set({
+                    name: name,
+                    username: username,
+                    email: email,
+                    phone: phone,
+                    business: business,
+                    balance: 0,
+                    recentOrders: 0,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    isActive: true
+                });
+                
+                showAlert(registerAlert, 'Account created successfully!', 'success');
+                // Switch to login tab after successful registration
+                setTimeout(() => {
+                    loginTab.click();
+                    document.getElementById('login-email').value = email;
+                }, 1500);
+            } catch (error) {
+                const professionalMessage = getProfessionalErrorMessage(error);
+                showAlert(registerAlert, professionalMessage, 'error');
+            }
         }
         
         // Logout function
@@ -1021,7 +1439,7 @@
                     loadingElement.style.display = 'none';
                     
                     if (querySnapshot.empty) {
-                        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">No inventory items found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text);">No inventory items found</td></tr>';
                         return;
                     }
                     
@@ -1057,7 +1475,7 @@
                 .catch((error) => {
                     loadingElement.style.display = 'none';
                     console.error('Error loading inventory:', error);
-                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">Error loading inventory data</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text);">Error loading inventory data</td></tr>';
                 });
         }
         
@@ -1074,7 +1492,7 @@
                     loadingElement.style.display = 'none';
                     
                     if (querySnapshot.empty) {
-                        servicesContainer.innerHTML = '<p style="color: #bbb; text-align: center;">No flashing services found</p>';
+                        servicesContainer.innerHTML = '<p style="color: var(--text); text-align: center;">No flashing services found</p>';
                         return;
                     }
                     
@@ -1085,7 +1503,7 @@
                         
                         serviceCard.innerHTML = `
                             <h3>${service.name}</h3>
-                            <p style="color: #bbb;">${service.description}</p>
+                            <p style="color: var(--text);">${service.description}</p>
                             <div class="service-price">$${service.price.toFixed(2)}</div>
                             <button class="btn">Order Service</button>
                         `;
@@ -1096,7 +1514,7 @@
                 .catch((error) => {
                     loadingElement.style.display = 'none';
                     console.error('Error loading services:', error);
-                    servicesContainer.innerHTML = '<p style="color: #bbb; text-align: center;">Error loading services data</p>';
+                    servicesContainer.innerHTML = '<p style="color: var(--text); text-align: center;">Error loading services data</p>';
                 });
         }
         
@@ -1162,6 +1580,7 @@
                     .then((doc) => {
                         if (doc.exists) {
                             const userData = doc.data();
+                            document.getElementById('account-username').value = userData.username || '';
                             document.getElementById('account-phone').value = userData.phone || '';
                             document.getElementById('account-business').value = userData.business || '';
                         }
@@ -1210,7 +1629,8 @@
                     document.getElementById('code-section').style.display = 'block';
                 })
                 .catch((error) => {
-                    showAlert(resetAlert, error.message, 'error');
+                    const professionalMessage = getProfessionalErrorMessage(error);
+                    showAlert(resetAlert, professionalMessage, 'error');
                 });
         }
         
@@ -1238,7 +1658,8 @@
                         }, 2000);
                     })
                     .catch((error) => {
-                        showAlert(resetAlert, error.message, 'error');
+                        const professionalMessage = getProfessionalErrorMessage(error);
+                        showAlert(resetAlert, professionalMessage, 'error');
                     });
             } else {
                 showAlert(resetAlert, 'Please log in to change your password', 'error');
@@ -1248,6 +1669,7 @@
         // Update user profile
         function updateProfile() {
             const name = document.getElementById('account-name').value;
+            const username = document.getElementById('account-username').value;
             const phone = document.getElementById('account-phone').value;
             const business = document.getElementById('account-business').value;
             const accountAlert = document.getElementById('account-alert');
@@ -1255,6 +1677,17 @@
             
             if (!user) {
                 showAlert(accountAlert, 'You must be logged in to update your profile', 'error');
+                return;
+            }
+            
+            // Validate inputs
+            const nameValid = validateName({ target: document.getElementById('account-name') });
+            const usernameValid = validateUsername({ target: document.getElementById('account-username') });
+            const phoneValid = validatePhone({ target: document.getElementById('account-phone') });
+            const businessValid = validateBusiness({ target: document.getElementById('account-business') });
+            
+            if (!nameValid || !usernameValid || !phoneValid || !businessValid) {
+                showAlert(accountAlert, 'Please fix the errors above', 'error');
                 return;
             }
             
@@ -1267,6 +1700,7 @@
                     // Update Firestore user document
                     return db.collection('users').doc(user.uid).set({
                         name: name,
+                        username: username,
                         phone: phone,
                         business: business,
                         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
@@ -1277,7 +1711,8 @@
                     updateUserInfo(user);
                 })
                 .catch((error) => {
-                    showAlert(accountAlert, error.message, 'error');
+                    const professionalMessage = getProfessionalErrorMessage(error);
+                    showAlert(accountAlert, professionalMessage, 'error');
                 });
         }
         
@@ -1294,13 +1729,18 @@
                 return;
             }
             
-            if (newPassword !== confirmPassword) {
-                showAlert(passwordAlert, 'New passwords do not match', 'error');
+            // Validate inputs
+            const currentValid = validatePassword({ target: document.getElementById('current-password') });
+            const newValid = validatePassword({ target: document.getElementById('new-password') });
+            const confirmValid = validatePassword({ target: document.getElementById('confirm-password') });
+            
+            if (!currentValid || !newValid || !confirmValid) {
+                showAlert(passwordAlert, 'Please fix the errors above', 'error');
                 return;
             }
             
-            if (!currentPassword || !newPassword) {
-                showAlert(passwordAlert, 'Please fill in all password fields', 'error');
+            if (newPassword !== confirmPassword) {
+                showAlert(passwordAlert, 'New passwords do not match', 'error');
                 return;
             }
             
@@ -1321,7 +1761,8 @@
                     document.getElementById('confirm-password').value = '';
                 })
                 .catch((error) => {
-                    showAlert(passwordAlert, error.message, 'error');
+                    const professionalMessage = getProfessionalErrorMessage(error);
+                    showAlert(passwordAlert, professionalMessage, 'error');
                 });
         }
         
