@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Phone Repair - Supplier Portal</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --text: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: rgba(26, 26, 46, 0.9);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary);
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 10px;
+            color: #ddd;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.6);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+        
+        /* Main Content */
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .page-title {
+            margin-bottom: 1.5rem;
+            color: white;
+            padding-bottom: 0.5rem;
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .page-subtitle {
+            color: #bbb;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Auth Forms */
+        .auth-container {
+            max-width: 450px;
+            margin: 2rem auto;
+            background: rgba(26, 26, 46, 0.8);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .auth-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 1.8rem;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .auth-tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #ddd;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.3);
+        }
+        
+        /* Dashboard */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: rgba(26, 26, 46, 0.7);
+            border-radius: 15px;
+            padding: 1.8rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+        
+        .card h3 {
+            color: #ddd;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+        
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Inventory Table */
+        .table-container {
+            background: rgba(26, 26, 46, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #ddd;
+        }
+        
+        th {
+            background-color: rgba(37, 117, 252, 0.2);
+            font-weight: 600;
+            color: white;
+        }
+        
+        tr:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        .status-available {
+            color: var(--success);
+            font-weight: 500;
+        }
+        
+        .status-low {
+            color: var(--warning);
+            font-weight: 500;
+        }
+        
+        .status-out {
+            color: var(--danger);
+            font-weight: 500;
+        }
+        
+        /* Flash Services */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .service-card {
+            background: rgba(26, 26, 46, 0.7);
+            border-radius: 15px;
+            padding: 1.8rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+        
+        .service-card h3 {
+            color: white;
+            margin-bottom: 0.8rem;
+            font-size: 1.3rem;
+        }
+        
+        .service-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 1rem 0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: rgba(26, 26, 46, 0.9);
+            color: #bbb;
+            text-align: center;
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            padding: 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h2 {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #bbb;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: white;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+        
+        .alert-error {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            nav ul li {
+                margin: 0.5rem;
+            }
+            
+            .user-info {
+                margin-top: 1rem;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i>🔧</i> Shadow Phone Repair
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" id="nav-dashboard">Dashboard</a></li>
+                    <li><a href="#" id="nav-inventory">Inventory</a></li>
+                    <li><a href="#" id="nav-flashing">Flashing Services</a></li>
+                    <li><a href="#" id="nav-account">My Account</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <span id="user-name">Welcome, User</span>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page">
+                <h1 class="page-title">Supplier Dashboard</h1>
+                <p class="page-subtitle">Manage your parts inventory and track your account</p>
+                
+                <div id="dashboard-loading" class="spinner"></div>
+                
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Outstanding Balance</h3>
+                        <div class="card-value" id="balance-amount">$0.00</div>
+                        <p>Last updated: <span id="balance-date">Today</span></p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Available Items</h3>
+                        <div class="card-value" id="available-items">0</div>
+                        <p>Items in stock</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Low Stock Items</h3>
+                        <div class="card-value" id="low-stock-items">0</div>
+                        <p>Need restocking</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Recent Orders</h3>
+                        <div class="card-value" id="recent-orders">0</div>
+                        <p>Last 30 days</p>
+                    </div>
+                </div>
+                
+                <h2 class="page-title">Quick Access</h2>
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Check Inventory</h3>
+                        <p>View all available parts and their prices</p>
+                        <button class="btn" id="quick-inventory">View Inventory</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Flashing Services</h3>
+                        <p>See our phone flashing prices</p>
+                        <button class="btn" id="quick-flashing">View Services</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>My Account</h3>
+                        <p>Update your password and details</p>
+                        <button class="btn" id="quick-account">Account Settings</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inventory Page -->
+            <div id="inventory-page" class="page" style="display: none;">
+                <h1 class="page-title">Parts Inventory</h1>
+                <p class="page-subtitle">Check availability and prices for all parts</p>
+                
+                <div id="inventory-loading" class="spinner"></div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Model</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body">
+                            <!-- Inventory data will be populated from Firebase -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Flashing Services Page -->
+            <div id="flashing-page" class="page" style="display: none;">
+                <h1 class="page-title">Phone Flashing Services</h1>
+                <p class="page-subtitle">Professional phone flashing and unlocking services</p>
+                
+                <div id="services-loading" class="spinner"></div>
+                
+                <div class="services-grid" id="services-container">
+                    <!-- Services will be populated from Firebase -->
+                </div>
+            </div>
+            
+            <!-- Account Page -->
+            <div id="account-page" class="page" style="display: none;">
+                <h1 class="page-title">My Account</h1>
+                <p class="page-subtitle">Manage your profile and security settings</p>
+                
+                <div class="auth-container">
+                    <h2>Account Information</h2>
+                    
+                    <div id="account-alert"></div>
+                    
+                    <div class="form-group">
+                        <label for="account-name">Full Name</label>
+                        <input type="text" id="account-name" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="account-email">Email Address</label>
+                        <input type="email" id="account-email" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="account-phone">Phone Number</label>
+                        <input type="tel" id="account-phone" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="account-business">Business Name</label>
+                        <input type="text" id="account-business" class="form-control">
+                    </div>
+                    
+                    <button class="btn" id="update-profile-btn">Update Profile</button>
+                    
+                    <hr style="margin: 1.5rem 0; border-color: rgba(255,255,255,0.1);">
+                    
+                    <h2>Change Password</h2>
+                    
+                    <div id="password-alert"></div>
+                    
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password</label>
+                        <input type="password" id="confirm-password" class="form-control">
+                    </div>
+                    
+                    <button class="btn" id="change-password-btn">Change Password</button>
+                    
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="#" id="forgot-password-link" style="color: var(--primary);">Forgot Password?</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Login Page -->
+            <div id="login-page" class="page">
+                <div class="auth-container">
+                    <div class="auth-tabs">
+                        <div class="auth-tab active" id="login-tab">Login</div>
+                        <div class="auth-tab" id="register-tab">Register</div>
+                    </div>
+                    
+                    <div id="login-form">
+                        <h2>Login to Your Account</h2>
+                        
+                        <div id="login-alert"></div>
+                        
+                        <div class="form-group">
+                            <label for="login-email">Email Address</label>
+                            <input type="email" id="login-email" class="form-control" placeholder="Enter your email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+                        </div>
+                        
+                        <button class="btn" id="login-btn" style="width: 100%;">Login</button>
+                        
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="#" id="forgot-password-login-link" style="color: var(--primary);">Forgot Password?</a>
+                        </div>
+                    </div>
+                    
+                    <div id="register-form" style="display: none;">
+                        <h2>Create New Account</h2>
+                        
+                        <div id="register-alert"></div>
+                        
+                        <div class="form-group">
+                            <label for="register-name">Full Name</label>
+                            <input type="text" id="register-name" class="form-control" placeholder="Enter your full name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-email">Email Address</label>
+                            <input type="email" id="register-email" class="form-control" placeholder="Enter your email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-phone">Phone Number</label>
+                            <input type="tel" id="register-phone" class="form-control" placeholder="Enter your phone number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-business">Business Name</label>
+                            <input type="text" id="register-business" class="form-control" placeholder="Enter your business name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" id="register-password" class="form-control" placeholder="Create a password">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-confirm">Confirm Password</label>
+                            <input type="password" id="register-confirm" class="form-control" placeholder="Confirm your password">
+                        </div>
+                        
+                        <button class="btn" id="register-btn" style="width: 100%;">Create Account</button>
+                        
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <p>Already have an account? <a href="#" id="login-link" style="color: var(--primary);">Login here</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Shadow Phone Repair. All rights reserved.</p>
+            <p>Professional Phone Repair Supplier Network</p>
+        </div>
+    </footer>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div id="reset-alert"></div>
+            
+            <div class="form-group">
+                <label for="reset-email">Enter your email address</label>
+                <input type="email" id="reset-email" class="form-control" placeholder="Your registered email">
+            </div>
+            
+            <button class="btn" id="send-reset-code">Send Reset Code</button>
+            
+            <div id="code-section" style="display: none; margin-top: 1rem;">
+                <div class="form-group">
+                    <label for="reset-code">Enter the code sent to your email</label>
+                    <input type="text" id="reset-code" class="form-control" placeholder="6-digit code">
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password-reset">New Password</label>
+                    <input type="password" id="new-password-reset" class="form-control">
+                </div>
+                
+                <button class="btn" id="reset-password-btn">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration - REPLACE WITH YOUR ACTUAL CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // DOM Elements
+        const loginPage = document.getElementById('login-page');
+        const dashboardPage = document.getElementById('dashboard-page');
+        const inventoryPage = document.getElementById('inventory-page');
+        const flashingPage = document.getElementById('flashing-page');
+        const accountPage = document.getElementById('account-page');
+        const forgotPasswordModal = document.getElementById('forgot-password-modal');
+        
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginTab = document.getElementById('login-tab');
+        const registerTab = document.getElementById('register-tab');
+        
+        // Navigation buttons
+        document.getElementById('nav-dashboard').addEventListener('click', () => showPage('dashboard'));
+        document.getElementById('nav-inventory').addEventListener('click', () => showPage('inventory'));
+        document.getElementById('nav-flashing').addEventListener('click', () => showPage('flashing'));
+        document.getElementById('nav-account').addEventListener('click', () => showPage('account'));
+        
+        // Quick access buttons
+        document.getElementById('quick-inventory').addEventListener('click', () => showPage('inventory'));
+        document.getElementById('quick-flashing').addEventListener('click', () => showPage('flashing'));
+        document.getElementById('quick-account').addEventListener('click', () => showPage('account'));
+        
+        // Auth tabs
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+        });
+        
+        registerTab.addEventListener('click', () => {
+            registerTab.classList.add('active');
+            loginTab.classList.remove('active');
+            registerForm.style.display = 'block';
+            loginForm.style.display = 'none';
+        });
+        
+        document.getElementById('login-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginTab.click();
+        });
+        
+        // Login/Register/Logout
+        document.getElementById('login-btn').addEventListener('click', login);
+        document.getElementById('register-btn').addEventListener('click', register);
+        document.getElementById('logout-btn').addEventListener('click', logout);
+        
+        // Password reset
+        document.getElementById('forgot-password-link').addEventListener('click', showForgotPasswordModal);
+        document.getElementById('forgot-password-login-link').addEventListener('click', showForgotPasswordModal);
+        document.querySelector('.close-modal').addEventListener('click', () => forgotPasswordModal.style.display = 'none');
+        document.getElementById('send-reset-code').addEventListener('click', sendPasswordResetEmail);
+        document.getElementById('reset-password-btn').addEventListener('click', resetPassword);
+        
+        // Account management
+        document.getElementById('update-profile-btn').addEventListener('click', updateProfile);
+        document.getElementById('change-password-btn').addEventListener('click', changePassword);
+        
+        // Firebase Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                showPage('dashboard');
+                updateUserInfo(user);
+                loadUserData(user.uid);
+            } else {
+                // User is signed out
+                showPage('login');
+            }
+        });
+        
+        // Initialize the app when the page loads
+        function initApp() {
+            // Firebase auth state listener will handle page display
+        }
+        
+        // Show specific page
+        function showPage(page) {
+            // Hide all pages
+            loginPage.style.display = 'none';
+            dashboardPage.style.display = 'none';
+            inventoryPage.style.display = 'none';
+            flashingPage.style.display = 'none';
+            accountPage.style.display = 'none';
+            
+            // Show requested page
+            switch(page) {
+                case 'login':
+                    loginPage.style.display = 'block';
+                    break;
+                case 'dashboard':
+                    dashboardPage.style.display = 'block';
+                    loadDashboardData();
+                    break;
+                case 'inventory':
+                    inventoryPage.style.display = 'block';
+                    loadInventoryData();
+                    break;
+                case 'flashing':
+                    flashingPage.style.display = 'block';
+                    loadFlashingServices();
+                    break;
+                case 'account':
+                    accountPage.style.display = 'block';
+                    loadAccountData();
+                    break;
+            }
+        }
+        
+        // Login function
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const loginAlert = document.getElementById('login-alert');
+            
+            if (!email || !password) {
+                showAlert(loginAlert, 'Please enter both email and password', 'error');
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed in successfully
+                    showAlert(loginAlert, 'Login successful!', 'success');
+                })
+                .catch((error) => {
+                    showAlert(loginAlert, error.message, 'error');
+                });
+        }
+        
+        // Register function
+        function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const phone = document.getElementById('register-phone').value;
+            const business = document.getElementById('register-business').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm').value;
+            const registerAlert = document.getElementById('register-alert');
+            
+            if (!name || !email || !phone || !business || !password) {
+                showAlert(registerAlert, 'Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert(registerAlert, 'Passwords do not match', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAlert(registerAlert, 'Password should be at least 6 characters', 'error');
+                return;
+            }
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // User created successfully
+                    const user = userCredential.user;
+                    
+                    // Update user profile
+                    return user.updateProfile({
+                        displayName: name
+                    }).then(() => {
+                        // Create user document in Firestore
+                        return db.collection('users').doc(user.uid).set({
+                            name: name,
+                            email: email,
+                            phone: phone,
+                            business: business,
+                            balance: 0,
+                            recentOrders: 0,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            isActive: true
+                        });
+                    });
+                })
+                .then(() => {
+                    showAlert(registerAlert, 'Account created successfully!', 'success');
+                    // Switch to login tab after successful registration
+                    setTimeout(() => {
+                        loginTab.click();
+                        document.getElementById('login-email').value = email;
+                    }, 1500);
+                })
+                .catch((error) => {
+                    showAlert(registerAlert, error.message, 'error');
+                });
+        }
+        
+        // Logout function
+        function logout() {
+            auth.signOut()
+                .then(() => {
+                    // Sign-out successful
+                    showPage('login');
+                })
+                .catch((error) => {
+                    console.error('Logout error:', error);
+                });
+        }
+        
+        // Update user info in the header
+        function updateUserInfo(user) {
+            document.getElementById('user-name').textContent = `Welcome, ${user.displayName || user.email}`;
+        }
+        
+        // Load inventory data from Firestore
+        function loadInventoryData() {
+            const tableBody = document.getElementById('inventory-table-body');
+            const loadingElement = document.getElementById('inventory-loading');
+            
+            tableBody.innerHTML = '';
+            loadingElement.style.display = 'block';
+            
+            db.collection('inventory').orderBy('name').get()
+                .then((querySnapshot) => {
+                    loadingElement.style.display = 'none';
+                    
+                    if (querySnapshot.empty) {
+                        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">No inventory items found</td></tr>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach((doc) => {
+                        const item = doc.data();
+                        const row = document.createElement('tr');
+                        
+                        let statusClass = '';
+                        let statusText = '';
+                        
+                        if (item.stock > 10) {
+                            statusClass = 'status-available';
+                            statusText = 'Available';
+                        } else if (item.stock > 0) {
+                            statusClass = 'status-low';
+                            statusText = 'Low Stock';
+                        } else {
+                            statusClass = 'status-out';
+                            statusText = 'Out of Stock';
+                        }
+                        
+                        row.innerHTML = `
+                            <td>${item.name}</td>
+                            <td>${item.model || 'N/A'}</td>
+                            <td>$${item.price.toFixed(2)}</td>
+                            <td>${item.stock}</td>
+                            <td class="${statusClass}">${statusText}</td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch((error) => {
+                    loadingElement.style.display = 'none';
+                    console.error('Error loading inventory:', error);
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">Error loading inventory data</td></tr>';
+                });
+        }
+        
+        // Load flashing services from Firestore
+        function loadFlashingServices() {
+            const servicesContainer = document.getElementById('services-container');
+            const loadingElement = document.getElementById('services-loading');
+            
+            servicesContainer.innerHTML = '';
+            loadingElement.style.display = 'block';
+            
+            db.collection('flashingServices').orderBy('name').get()
+                .then((querySnapshot) => {
+                    loadingElement.style.display = 'none';
+                    
+                    if (querySnapshot.empty) {
+                        servicesContainer.innerHTML = '<p style="color: #bbb; text-align: center;">No flashing services found</p>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach((doc) => {
+                        const service = doc.data();
+                        const serviceCard = document.createElement('div');
+                        serviceCard.className = 'service-card';
+                        
+                        serviceCard.innerHTML = `
+                            <h3>${service.name}</h3>
+                            <p style="color: #bbb;">${service.description}</p>
+                            <div class="service-price">$${service.price.toFixed(2)}</div>
+                            <button class="btn">Order Service</button>
+                        `;
+                        
+                        servicesContainer.appendChild(serviceCard);
+                    });
+                })
+                .catch((error) => {
+                    loadingElement.style.display = 'none';
+                    console.error('Error loading services:', error);
+                    servicesContainer.innerHTML = '<p style="color: #bbb; text-align: center;">Error loading services data</p>';
+                });
+        }
+        
+        // Load dashboard data from Firestore
+        function loadDashboardData() {
+            const loadingElement = document.getElementById('dashboard-loading');
+            loadingElement.style.display = 'block';
+            
+            // Load inventory for counts
+            db.collection('inventory').get()
+                .then((querySnapshot) => {
+                    loadingElement.style.display = 'none';
+                    
+                    let availableItems = 0;
+                    let lowStockItems = 0;
+                    
+                    querySnapshot.forEach((doc) => {
+                        const item = doc.data();
+                        if (item.stock > 10) {
+                            availableItems++;
+                        } else if (item.stock > 0) {
+                            lowStockItems++;
+                        }
+                    });
+                    
+                    document.getElementById('available-items').textContent = availableItems;
+                    document.getElementById('low-stock-items').textContent = lowStockItems;
+                    
+                    // Load user-specific data (balance, orders)
+                    const user = auth.currentUser;
+                    if (user) {
+                        return db.collection('users').doc(user.uid).get();
+                    }
+                })
+                .then((userDoc) => {
+                    if (userDoc && userDoc.exists) {
+                        const userData = userDoc.data();
+                        document.getElementById('balance-amount').textContent = `$${userData.balance?.toFixed(2) || '0.00'}`;
+                        document.getElementById('recent-orders').textContent = userData.recentOrders || '0';
+                        
+                        // Update balance date
+                        if (userData.lastUpdated) {
+                            const date = userData.lastUpdated.toDate();
+                            document.getElementById('balance-date').textContent = date.toLocaleDateString();
+                        }
+                    }
+                })
+                .catch((error) => {
+                    loadingElement.style.display = 'none';
+                    console.error('Error loading dashboard data:', error);
+                });
+        }
+        
+        // Load account data
+        function loadAccountData() {
+            const user = auth.currentUser;
+            if (user) {
+                document.getElementById('account-name').value = user.displayName || '';
+                document.getElementById('account-email').value = user.email;
+                
+                // Load additional user data from Firestore
+                db.collection('users').doc(user.uid).get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            document.getElementById('account-phone').value = userData.phone || '';
+                            document.getElementById('account-business').value = userData.business || '';
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error loading user data:', error);
+                    });
+            }
+        }
+        
+        // Load user data from Firestore
+        function loadUserData(userId) {
+            db.collection('users').doc(userId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        // Update any user-specific UI elements if needed
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading user data:', error);
+                });
+        }
+        
+        // Show forgot password modal
+        function showForgotPasswordModal() {
+            document.getElementById('reset-alert').innerHTML = '';
+            document.getElementById('code-section').style.display = 'none';
+            document.getElementById('reset-email').value = '';
+            forgotPasswordModal.style.display = 'flex';
+        }
+        
+        // Send password reset email
+        function sendPasswordResetEmail() {
+            const email = document.getElementById('reset-email').value;
+            const resetAlert = document.getElementById('reset-alert');
+            
+            if (!email) {
+                showAlert(resetAlert, 'Please enter your email address', 'error');
+                return;
+            }
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showAlert(resetAlert, 'Password reset email sent! Check your inbox.', 'success');
+                    document.getElementById('code-section').style.display = 'block';
+                })
+                .catch((error) => {
+                    showAlert(resetAlert, error.message, 'error');
+                });
+        }
+        
+        // Reset password (Note: Firebase handles this via email link, this is for demo)
+        function resetPassword() {
+            const code = document.getElementById('reset-code').value;
+            const newPassword = document.getElementById('new-password-reset').value;
+            const resetAlert = document.getElementById('reset-alert');
+            
+            if (!code || !newPassword) {
+                showAlert(resetAlert, 'Please enter the code and new password', 'error');
+                return;
+            }
+            
+            // In a real implementation, you would use the code to verify the user
+            // and then update the password. This is simplified for the demo.
+            const user = auth.currentUser;
+            
+            if (user) {
+                user.updatePassword(newPassword)
+                    .then(() => {
+                        showAlert(resetAlert, 'Password updated successfully!', 'success');
+                        setTimeout(() => {
+                            forgotPasswordModal.style.display = 'none';
+                        }, 2000);
+                    })
+                    .catch((error) => {
+                        showAlert(resetAlert, error.message, 'error');
+                    });
+            } else {
+                showAlert(resetAlert, 'Please log in to change your password', 'error');
+            }
+        }
+        
+        // Update user profile
+        function updateProfile() {
+            const name = document.getElementById('account-name').value;
+            const phone = document.getElementById('account-phone').value;
+            const business = document.getElementById('account-business').value;
+            const accountAlert = document.getElementById('account-alert');
+            const user = auth.currentUser;
+            
+            if (!user) {
+                showAlert(accountAlert, 'You must be logged in to update your profile', 'error');
+                return;
+            }
+            
+            const updates = {};
+            if (name) updates.displayName = name;
+            
+            // Update Firebase Auth profile
+            user.updateProfile(updates)
+                .then(() => {
+                    // Update Firestore user document
+                    return db.collection('users').doc(user.uid).set({
+                        name: name,
+                        phone: phone,
+                        business: business,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                })
+                .then(() => {
+                    showAlert(accountAlert, 'Profile updated successfully!', 'success');
+                    updateUserInfo(user);
+                })
+                .catch((error) => {
+                    showAlert(accountAlert, error.message, 'error');
+                });
+        }
+        
+        // Change password
+        function changePassword() {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const passwordAlert = document.getElementById('password-alert');
+            const user = auth.currentUser;
+            
+            if (!user) {
+                showAlert(passwordAlert, 'You must be logged in to change your password', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showAlert(passwordAlert, 'New passwords do not match', 'error');
+                return;
+            }
+            
+            if (!currentPassword || !newPassword) {
+                showAlert(passwordAlert, 'Please fill in all password fields', 'error');
+                return;
+            }
+            
+            // Reauthenticate user before changing password
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                user.email, 
+                currentPassword
+            );
+            
+            user.reauthenticateWithCredential(credential)
+                .then(() => {
+                    return user.updatePassword(newPassword);
+                })
+                .then(() => {
+                    showAlert(passwordAlert, 'Password changed successfully!', 'success');
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                })
+                .catch((error) => {
+                    showAlert(passwordAlert, error.message, 'error');
+                });
+        }
+        
+        // Utility function to show alerts
+        function showAlert(container, message, type) {
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+        
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
